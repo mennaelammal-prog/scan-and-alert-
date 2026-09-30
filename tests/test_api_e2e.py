@@ -365,14 +365,32 @@ def test_app_refuses_to_start_with_live_config(monkeypatch):
 
 
 def test_no_outbound_network_during_fixture_mode(monkeypatch):
-    def boom(*a, **k):
-        raise AssertionError("outbound network connection attempted")
+    """Only loopback sockets are allowed (Windows' asyncio opens a loopback socketpair internally)."""
+    loopback = {"127.0.0.1", "::1", "localhost"}
+    real_connect, real_connect_ex, real_create = (
+        socket.socket.connect,
+        socket.socket.connect_ex,
+        socket.create_connection,
+    )
+
+    def host_of(address):
+        return address[0] if isinstance(address, tuple) else address
+
+    def guard(real):
+        def wrapper(*args, **kwargs):
+            # bound method (self, address, ...) or plain function (address, ...)
+            address = args[1] if real is not real_create else args[0]
+            if host_of(address) not in loopback:
+                raise AssertionError(f"outbound network connection attempted to {host_of(address)!r}")
+            return real(*args, **kwargs)
+
+        return wrapper
 
     app = create_app(Settings(database_url="sqlite://", fixture_autostart=False))
-    monkeypatch.setattr(socket.socket, "connect", boom)
-    monkeypatch.setattr(socket.socket, "connect_ex", boom)
-    monkeypatch.setattr(socket, "create_connection", boom)
-    with TestClient(app) as c:  # in-process ASGI transport: no sockets needed
+    monkeypatch.setattr(socket.socket, "connect", guard(real_connect))
+    monkeypatch.setattr(socket.socket, "connect_ex", guard(real_connect_ex))
+    monkeypatch.setattr(socket, "create_connection", guard(real_create))
+    with TestClient(app) as c:
         assert c.get("/health").status_code == 200
         assert c.post("/api/dev/replay/run", params={"until_minutes": 25}).status_code == 200
         assert (
@@ -386,3 +404,5 @@ def test_no_outbound_network_during_fixture_mode(monkeypatch):
             ).status_code
             == 202
         )
+    with pytest.raises(AssertionError, match="outbound"):  # the guard itself works
+        socket.create_connection(("203.0.113.7", 80))
