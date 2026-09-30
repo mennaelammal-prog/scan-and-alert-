@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>scanalert - paper-only scanner</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">scanalert</div>
+  <nav id="nav">
+    <a href="#/dashboard">Dashboard</a>
+    <a href="#/scanner">Scanner</a>
+    <a href="#/alerts">Live alerts</a>
+    <a href="#/toplists">Top Lists</a>
+    <a href="#/backtest">Backtest</a>
+    <a href="#/backtests">Reports</a>
+    <a href="#/settings">Settings</a>
+  </nav>
+  <div id="badges" class="badges" aria-live="polite"></div>
+</header>
+<div id="banner" class="banner" hidden></div>
+<main id="view" tabindex="-1"></main>
+<footer class="foot">PAPER ONLY. Every alert, entry, fill and backtest here is hypothetical or simulated. Nothing is ever sent to a broker. Backtests are historical simulations, not predictions.</footer>
+<script src="app.js" type="module"></script>
+</body>
+</html>

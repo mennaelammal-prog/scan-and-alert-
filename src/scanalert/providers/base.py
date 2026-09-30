@@ -1,0 +1,26 @@
+"""Provider interface. Adapters normalise vendor payloads into :mod:`scanalert.models` events."""
+
+from __future__ import annotations
+
+from collections.abc import AsyncIterator
+from typing import Protocol, runtime_checkable
+
+from ..models import Bar, HistoricalBarsRequest, MarketEvent, ProviderHealth
+
+
+@runtime_checkable
+class MarketDataProvider(Protocol):
+    name: str
+
+    async def subscribe_trades(self, symbols: list[str]) -> None: ...
+    async def subscribe_quotes(self, symbols: list[str]) -> None: ...
+    async def subscribe_bars(self, symbols: list[str], timeframe: str) -> None: ...
+    async def historical_bars(self, request: HistoricalBarsRequest) -> list[Bar]: ...
+    async def health(self) -> ProviderHealth: ...
+
+    def events(self) -> AsyncIterator[MarketEvent]:
+        """Normalised event stream (reconnects are handled inside the adapter)."""
+        ...
+
+    async def start(self) -> None: ...
+    async def stop(self) -> None: ...
