@@ -19,7 +19,7 @@ Last verified: 2026-09-30 on Linux, Python 3.11.15.
 | Paper intents/fills without any broker write | **Done** | No order code exists; tests block sockets/HTTP during intent creation; DB CHECK constraints |
 | Paper-only guard automated tests | **Done** | `test_safety.py` (39 tests) incl. repo scan for live URLs/credentials |
 | Reconnect, duplicate, stale, correction behaviour tested | **Done** | `test_stream.py`, `test_integration.py` (fault injection: duplicates, late bar, correction, disconnect, halt) |
-| PowerShell scripts | **Partially verified** | PowerShell is not installed on the build host; setup/migrate/test confirmed by a user run on Windows, the rest statically checked only (strict mode, dry-run, failure messages, paper guard). The Python commands they wrap were executed. See below |
+| PowerShell scripts | **Partially verified** | PowerShell is not installed on the build host; setup, migrate, test, smoke and run-dev confirmed by a user run on Windows; the rest statically checked only (strict mode, dry-run, failure messages, paper guard). The Python commands they wrap were executed. See below |
 | API documentation generated | **Done** | `/docs`, `/openapi.json`, `API.md` (examples captured from the running app) |
 | README setup instructions | **Done** | `README.md`, `POWER_SHELL_SETUP.md` |
 | No secrets committed | **Done** | `.env` git-ignored; `.env.example` has empty credentials (test enforces); grep for key patterns clean |
@@ -71,7 +71,7 @@ notifications appeared in the alert list; filter-value errors were confusing; re
    text-based). This is the main integration risk.
 2. **Trade Ideas and vendor pages were not fetched.** Behaviour comes from the master prompt and `trade-ideas-technical-resource-map.md`. Nothing
    claims compatibility with Trade Ideas internals.
-3. **PowerShell scripts: only partly confirmed.** A user run on Windows PowerShell 5.1 with Python 3.14 confirmed `setup.ps1` and `migrate.ps1` work and `test.ps1` runs (335 of 336 passed; the failure was a test that blocked Windows' internal loopback socket, now fixed). `run-smoke-test.ps1`, `run-dev.ps1` and `stop-dev.ps1` have not yet been confirmed on Windows. Please run the verification block in `POWER_SHELL_SETUP.md` on Windows. Known risk areas:
+3. **PowerShell scripts: confirmed on Windows** (Windows PowerShell 5.1, Python 3.14, user-run): `setup.ps1`, `migrate.ps1`, `test.ps1` (336 passed), `run-smoke-test.ps1` (20/20 steps) and `run-dev.ps1` (backend up, paper_only=True) all worked. `stop-dev.ps1`, `run-frontend.ps1`, `run-backend.ps1` and `seed-fixtures.ps1` (run indirectly by `run-dev.ps1`) are not separately confirmed.
    `Start-Process` redirection in `run-dev.ps1`, execution policy.
 4. **Synthetic data only.** All alerts, top lists and backtest numbers in this repo come from a seeded synthetic generator. The very high win rates
    in sample reports are artefacts of the synthetic scenarios and mean nothing about markets.
